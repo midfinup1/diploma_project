@@ -6,21 +6,22 @@ import shutil
 
 
 class Vk:
-    def __init__(self, user_id: str):
-        self.user_id = user_id
+    def __init__(self, user_id: str, token_vk: str):
+        self.user_id = input('Введите id профиля: ')
+        self.token_id = input('Введите токен ВК: ')
 
     def get_profile_pics(self):
-        VK_TOKEN = vk_token_input
+        VK_TOKEN = self.token_id
         API_BASE_URL = 'https://api.vk.com/method/'
         V = '5.124'
         ALBUM_ID = 'profile'
-        OWNER_ID = user_id_input
+        USER_ID = self.user_id
         photos_get_url = (API_BASE_URL + 'photos.get')
         response = requests.get(photos_get_url, params={
             'access_token': VK_TOKEN,
             'v': V,
             'album_id': ALBUM_ID,
-            'owner_id': OWNER_ID,
+            'owner_id': USER_ID,
             'extended': 1
         })
         os.mkdir("temp_folder")
@@ -49,46 +50,50 @@ class Vk:
             filename = "temp_folder" + f"/{photo_name}.txt"
             with open(filename, "w") as f:
                 f.write(json.dumps(file_to_upload))
-            count = 5
-        return photo_name_list, count
 
 
 class Yandex:
     def __init__(self, token: str):
-        self.token = token
+        self.token = input('Введите свой токен Яндекс: ')
 
-    def upload(self):
-        response = Vk.get_profile_pics(user_id_input)
-        photo_name_list = response[0]
-        count = response[1]
-        HEADERS = {"Authorization": f"OAuth {self.token}"}
+    def upload(self, download_folder: str, upload_folder: str):
+        download_folder = "temp_folder"
         data = {'path': 'Netology_folder'}
-        data_name = data['path']
+        upload_folder = data['path']
+        HEADERS = {"Authorization": f"OAuth {self.token}"}
         requests.put('https://cloud-api.yandex.net/v1/disk/resources', headers=HEADERS, params=data)
+        count = 5
         for i in tqdm.tqdm(range(0, count)):
-            photo_name = photo_name_list[i]
-            data = {'path': f'{data_name}/{photo_name}.jpg'}
+            photo_name = os.listdir(download_folder)[::2][i].split('.')[0]
+            data = {'path': f'{upload_folder}/{photo_name}.jpg'}
             response = requests.get('https://cloud-api.yandex.net/v1/disk/resources/upload', headers=HEADERS,
                                     params=data)
             ya_disk_url = response.json()['href']
             filename = "temp_folder" + f"/{photo_name}.jpg"
             files = {'file': open(filename, 'rb')}
             requests.post(ya_disk_url, files=files)
-            data = {'path': f'{data_name}/{photo_name}.txt'}
+            data = {'path': f'{upload_folder}/{photo_name}.txt'}
             filename = "temp_folder" + f"/{photo_name}.txt"
             response = requests.get('https://cloud-api.yandex.net/v1/disk/resources/upload', headers=HEADERS,
                                     params=data)
             ya_disk_url = response.json()['href']
             files = {'file': open(filename, 'rb')}
             requests.post(ya_disk_url, files=files)
-        return 'Done'
+        print('Done')
 
 
-if __name__ == '__main__':
-    user_id_input = input('Введите id профиля: ')
-    yandex_token_input = input('Введите свой яндекс токен: ')
-    vk_token_input = input('Введите свой токен ВК: ')
-    uploader = Yandex(yandex_token_input)
-    result = uploader.upload()
-    print(result)
-    shutil.rmtree("temp_folder")
+class Service:
+    def __init_(self):
+        pass
+
+    def delete_folder(self, folder: str):
+        folder = 'temp_folder'
+        shutil.rmtree(folder)
+
+
+user = Vk('', '')
+user.get_profile_pics()
+user1 = Yandex('')
+user1.upload('', '')
+service = Service()
+service.delete_folder('')
