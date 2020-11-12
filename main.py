@@ -26,6 +26,7 @@ class Vk:
         })
         os.mkdir("temp_folder")
         photo_name_list = []
+        file_to_upload = []
         count = response.json()['response']['count']
         for items in response.json()['response']['items']:
             photo_name = items['likes']['count']
@@ -34,7 +35,6 @@ class Vk:
             photo_name_list.append(photo_name)
             max_value = 0
             temp_dict = {}
-            file_to_upload = []
             for item in items['sizes']:
                 if item['width'] > max_value:
                     max_value = item['width']
@@ -47,9 +47,9 @@ class Vk:
             filename = "temp_folder" + f"/{photo_name}.jpg"
             with open(filename, "wb") as f:
                 f.write(img.content)
-            filename = "temp_folder" + f"/{photo_name}.txt"
-            with open(filename, "w") as f:
-                f.write(json.dumps(file_to_upload))
+        filename = "temp_folder" + '/' + "all_photos.txt"
+        with open(filename, "w") as f:
+            f.write(json.dumps(file_to_upload))
 
 
 class Yandex:
@@ -64,7 +64,7 @@ class Yandex:
         requests.put('https://cloud-api.yandex.net/v1/disk/resources', headers=HEADERS, params=data)
         count = 5
         for i in tqdm.tqdm(range(0, count)):
-            photo_name = os.listdir(download_folder)[::2][i].split('.')[0]
+            photo_name = os.listdir(download_folder)[i].split('.')[0]
             data = {'path': f'{upload_folder}/{photo_name}.jpg'}
             response = requests.get('https://cloud-api.yandex.net/v1/disk/resources/upload', headers=HEADERS,
                                     params=data)
@@ -72,28 +72,18 @@ class Yandex:
             filename = "temp_folder" + f"/{photo_name}.jpg"
             files = {'file': open(filename, 'rb')}
             requests.post(ya_disk_url, files=files)
-            data = {'path': f'{upload_folder}/{photo_name}.txt'}
-            filename = "temp_folder" + f"/{photo_name}.txt"
-            response = requests.get('https://cloud-api.yandex.net/v1/disk/resources/upload', headers=HEADERS,
-                                    params=data)
-            ya_disk_url = response.json()['href']
-            files = {'file': open(filename, 'rb')}
-            requests.post(ya_disk_url, files=files)
+        data = {'path': f'{upload_folder}/all_photos.txt'}
+        filename = "temp_folder" + "/" + "all_photos.txt"
+        response = requests.get('https://cloud-api.yandex.net/v1/disk/resources/upload', headers=HEADERS,
+                                params=data)
+        ya_disk_url = response.json()['href']
+        files = {'file': open(filename, 'rb')}
+        requests.post(ya_disk_url, files=files)
         print('Done')
-
-
-class Service:
-    def __init_(self):
-        pass
-
-    def delete_folder(self, folder: str):
-        folder = 'temp_folder'
-        shutil.rmtree(folder)
 
 
 user = Vk('', '')
 user.get_profile_pics()
 user1 = Yandex('')
 user1.upload('', '')
-service = Service()
-service.delete_folder('')
+shutil.rmtree('temp_folder')
