@@ -47,7 +47,7 @@ class Vk:
             filename = "temp_folder" + f"/{photo_name}.jpg"
             with open(filename, "wb") as f:
                 f.write(img.content)
-        filename = "temp_folder" + '/' + "all_photos.txt"
+        filename = "temp_folder" + '/' + "all_photos.json"
         with open(filename, "w") as f:
             f.write(json.dumps(file_to_upload))
 
@@ -72,8 +72,8 @@ class Yandex:
             filename = "temp_folder" + f"/{photo_name}.jpg"
             files = {'file': open(filename, 'rb')}
             requests.post(ya_disk_url, files=files)
-        data = {'path': f'{upload_folder}/all_photos.txt'}
-        filename = "temp_folder" + "/" + "all_photos.txt"
+        data = {'path': f'{upload_folder}/all_photos.json'}
+        filename = "temp_folder" + "/" + "all_photos.json"
         response = requests.get('https://cloud-api.yandex.net/v1/disk/resources/upload', headers=HEADERS,
                                 params=data)
         ya_disk_url = response.json()['href']
@@ -82,8 +82,9 @@ class Yandex:
         print('Done')
 
 
-user = Vk('', '')
-user.get_profile_pics()
-user1 = Yandex('')
-user1.upload('', '')
-shutil.rmtree('temp_folder')
+if __name__ == '__main__':
+    user = Vk('', '')
+    user.get_profile_pics()
+    user1 = Yandex('')
+    user1.upload('', '')
+    shutil.rmtree('temp_folder')
